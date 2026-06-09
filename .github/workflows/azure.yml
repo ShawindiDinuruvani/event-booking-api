@@ -20,6 +20,12 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
 
+      - name: Optimize Laravel
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan route:clear
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
