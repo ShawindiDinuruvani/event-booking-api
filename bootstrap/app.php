@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             EnsureFrontendRequestsAreStateful::class,
         ]);
+         $middleware->alias([
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+    ]);
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
