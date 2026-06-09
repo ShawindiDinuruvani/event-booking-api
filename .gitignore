@@ -1,4 +1,4 @@
-*.log
+git remote add origin https://github.com/ShawindiDinuruvani/event-booking-api.git*.log
 .DS_Store
 .env
 .env.backup
