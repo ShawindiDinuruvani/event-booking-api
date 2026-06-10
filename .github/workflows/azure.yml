@@ -20,11 +20,21 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
 
+      - name: Create SQLite file (CI fix)
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Set CI environment
+        run: |
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=/tmp/database.sqlite" >> .env
+
       - name: Optimize Laravel
         run: |
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan route:clear
+          php artisan config:clear || true
+          php artisan cache:clear || true
+          php artisan route:clear || true
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
