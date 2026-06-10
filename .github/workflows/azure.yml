@@ -9,6 +9,10 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 
@@ -20,25 +24,36 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      - name: Create SQLite file (CI fix)
+      # FIX: prevent SQLite crash in GitHub Actions
+      - name: Create SQLite file
         run: |
           mkdir -p database
           touch database/database.sqlite
 
+      # OPTIONAL: safe env setup for CI
       - name: Set CI environment
         run: |
           echo "DB_CONNECTION=sqlite" >> .env
           echo "DB_DATABASE=/tmp/database.sqlite" >> .env
 
+      # SAFE Laravel commands (won't break pipeline)
       - name: Optimize Laravel
         run: |
           php artisan config:clear || true
           php artisan cache:clear || true
           php artisan route:clear || true
 
+      # 🔐 AZURE LOGIN (IMPORTANT FIX)
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_53CBEC304047407D8E5B6D2DCAC12C21 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F06F6BBF379C436B9C666C0EE687D5CF }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7513B5D8216A4880B821EFB9D7D95B34 }}
+
+      # 🚀 DEPLOY TO AZURE
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: erp-backend-oviya
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           package: .
